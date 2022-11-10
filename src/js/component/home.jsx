@@ -32,7 +32,7 @@ const Home = () => {
 				headers: {"Content-type":"application/json"},
 				body: JSON.stringify(newList)
 			}).then (resp=>console.log(resp.ok))
-			.catch(error=> console.log("this an error from the backend",error))
+			.catch(error=> console.log("this an error",error))
 		}
 	}
 
