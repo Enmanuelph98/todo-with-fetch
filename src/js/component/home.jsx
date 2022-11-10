@@ -1,32 +1,56 @@
-import React, {useState} from "react";
+import React, {useState,useEffect} from "react";
 const Home = () => {
 
 
 	const [tasks, setTasks] = useState([])
 
 	const [input, setInput] = useState("")
+	const backendUrl= "https://assets.breatheco.de/apis/fake/todos/user/enmanuelph98"
+	const getCurrentList = ()=> {
+		fetch (backendUrl)
+		.then (resp=> resp.json() )
+		.then (data => setTasks(data))}
+
+	useEffect(() => {
+			getCurrentList()
+	}, []);
 
 	const handleSubmit = (event) => {
 		event.preventDefault()
 		if (input != ""){
-			let addTask = {
-				id: Math.floor(Math.random() * 1000),
-				text:input,
-				completed: false
+			let newTask = {
+				label:input,
+				done: false
 			}
-			setTasks([...tasks, addTask])
+
+			let newList = [...tasks, newTask]
+			setTasks(newList)
 			setInput("")
+
+			fetch(backendUrl,{
+				method:"PUT",
+				headers: {"Content-type":"application/json"},
+				body: JSON.stringify(newList)
+			}).then (resp=>console.log(resp.ok))
+			.catch(error=> console.log("this an error from the backend",error))
 		}
 	}
 
-	const deleteTask = (id) => {
-		let filteredTasks = tasks.filter( task => task.id !== id )
+	const deleteTask = (index) => {
+		let filteredTasks = tasks.filter( (task,idx) => index !== idx)
 		setTasks(filteredTasks)
+
+		fetch(backendUrl,{
+			method:"PUT",
+			headers: {"Content-type":"application/json"},
+			body: JSON.stringify(filteredTasks)
+		}).then (resp=>console.log(resp.ok))
+		.catch(error=> console.log("this an error from the backend",error))
 	}
 
 	return (
 		<div className="text-center">
-			<h1 className="todo">Todos</h1>
+			<h1 className=''>Todos</h1>
 			<div className="list-card">
 				<form onSubmit={handleSubmit}>
 					<input 
@@ -38,15 +62,11 @@ const Home = () => {
 					/>
 				</form>
 				<div className="list-items">
-					{tasks.map((task) => (
-						<div className="todo" key={task.id}>
-							<p>{task.text}
-								<button 
-									className="button" 
-									onClick={ () => deleteTask(task.id)}>
-										&#10060;
-								</button>
-							</p>
+					{tasks.map((task,index) => (
+						<div className="todo navbar mx-auto" key={task.id}>
+							{task.label}
+						
+								<i class="fa-solid fa-trash-can" onClick={ () => deleteTask(index)}></i>	
 						</div>
 					  )
 					)}
